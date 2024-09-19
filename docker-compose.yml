@@ -1,0 +1,75 @@
+version: '3.5'
+
+services:
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    environment:
+      TZ: "Asia/Yekaterinburg"
+    expose:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "9411:9411"
+    ports: 
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "9411:9411"
+    restart: unless-stopped
+    networks:
+      - medods
+  
+  postgres:
+    image: postgres:12.20-alpine3.20
+    container_name: postgres
+    environment:
+      TZ: "Asia/Yekaterinburg"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test123456
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - postgresql:/var/lib/postgresql/data
+    expose:
+      - 5432
+    ports:
+      - "5446:5432"
+    restart: unless-stopped
+    networks:
+      - medods
+  
+  auth-service:
+    container_name: auth-service
+    image: auth-service-image  
+    environment:
+      DATABASE_URL: "host=postgres port=5432 user=postgres dbname=authdb password=test123456 sslmode=disable TimeZone=Asia/Yekaterinburg"
+      SERVER_HOST: "0.0.0.0:3000"
+      SERVICE_NAME: "AUTH_SERVICE"
+      JWT_SECRET: test
+      LOG_LEVEL: debug
+      JAEGER_HOST: "http://jaeger:14268/api/traces"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - jaeger
+    working_dir: /app
+    expose:
+      - 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - medods
+
+volumes:
+  postgres:
+  postgresql:
+
+networks:
+  medods: {}

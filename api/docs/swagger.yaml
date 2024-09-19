@@ -1,0 +1,98 @@
+basePath: /
+definitions:
+  handler.errorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  handler.goodResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      status:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API auth-service
+  title: auth-service
+  version: "1.0"
+paths:
+  /v1/auth/{id}:
+    post:
+      description: get access and refresh access token
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.goodResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Authentication
+      tags:
+      - Authorization
+  /v1/auth/refresh:
+    post:
+      description: Refreshes the access and refresh tokens.
+      parameters:
+      - description: Access token
+        in: header
+        name: access
+        required: true
+        type: string
+      - description: Refresh token
+        in: header
+        name: refresh
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.goodResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Refresh authentication tokens
+      tags:
+      - Authentication
+swagger: "2.0"
